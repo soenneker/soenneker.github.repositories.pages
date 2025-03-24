@@ -2,6 +2,7 @@
 using Soenneker.Tests.FixturedUnit;
 using System.Threading.Tasks;
 using Soenneker.Facts.Local;
+using Soenneker.GitHub.Repositories.Pages.Enums;
 using Soenneker.GitHub.Repositories.Pages.Requests;
 using Xunit;
 
@@ -19,13 +20,18 @@ public class GitHubRepositoriesPagesUtilTests : FixturedUnitTest
 
     [Fact]
     public void Default()
-    { 
-    
+    {
     }
 
     [LocalFact]
     public async ValueTask UpdateBuildType_should_update()
     {
-        await _util.UpdateBuildType("soenneker", "soenneker.blazor.stripe.elements", new GitHubPagesUpdateRequest { BuildType = "workflow"}, CancellationToken);
+        var createResponse = await _util.Create("soenneker", "soenneker.blazor.stripe.elements",
+            new GitHubPagesCreateRequest {BuildType = GitHubPagesBuildType.Workflow}, CancellationToken);
+
+        var updateResponse = await _util.Get("soenneker", "soenneker.blazor.stripe.elements", CancellationToken);
+
+        await _util.Update("soenneker", "soenneker.blazor.stripe.elements", new GitHubPagesUpdateRequest {BuildType = GitHubPagesBuildType.Workflow},
+            CancellationToken);
     }
 }

@@ -4,21 +4,8 @@ using Soenneker.GitHub.Repositories.Pages.Dtos;
 
 namespace Soenneker.GitHub.Repositories.Pages.Requests;
 
-public record GitHubPagesUpdateRequest
+public record GitHubPagesCreateRequest
 {
-    /// <summary>
-    /// Specify a custom domain for the repository. 
-    /// Sending a null value will remove the custom domain.
-    /// </summary>
-    [JsonPropertyName("cname")]
-    public string? CName { get; set; }
-
-    /// <summary>
-    /// Specify whether HTTPS should be enforced for the repository.
-    /// </summary>
-    [JsonPropertyName("https_enforced")]
-    public bool HttpsEnforced { get; set; }
-
     /// <summary>
     /// The process by which the GitHub Pages site will be built.
     /// Allowed values: "legacy", "workflow".
@@ -31,5 +18,5 @@ public record GitHubPagesUpdateRequest
     /// Must include both a branch and a path.
     /// </summary>
     [JsonPropertyName("source")]
-    public GitHubPagesSource? Source { get; set; }
+    public GitHubPagesSource Source { get; set; } = null!;
 }
