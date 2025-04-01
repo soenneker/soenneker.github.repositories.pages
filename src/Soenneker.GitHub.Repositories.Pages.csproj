@@ -50,6 +50,6 @@
     <ItemGroup>
         <PackageReference Include="Intellenum" Version="1.0.6" />
         <PackageReference Include="Soenneker.Extensions.HttpClient" Version="3.0.3170" />
-        <PackageReference Include="Soenneker.GitHub.Client.Http" Version="3.0.899" />
+        <PackageReference Include="Soenneker.GitHub.Client.Http" Version="3.0.901" />
     </ItemGroup>
 </Project>
