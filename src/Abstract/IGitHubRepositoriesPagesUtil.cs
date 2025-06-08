@@ -1,7 +1,7 @@
-﻿using Soenneker.GitHub.Repositories.Pages.Requests;
-using Soenneker.GitHub.Repositories.Pages.Responses;
+﻿using Soenneker.GitHub.OpenApiClient.Models;
 using System.Threading;
 using System.Threading.Tasks;
+using Soenneker.GitHub.OpenApiClient.Repos.Item.Item.Pages;
 
 namespace Soenneker.GitHub.Repositories.Pages.Abstract;
 
@@ -10,11 +10,11 @@ namespace Soenneker.GitHub.Repositories.Pages.Abstract;
 /// </summary>
 public interface IGitHubRepositoriesPagesUtil
 {
-    ValueTask<GitHubPagesResponse?> Get(string owner, string repo, CancellationToken cancellationToken = default);
+    ValueTask<Page?> Get(string owner, string repo, CancellationToken cancellationToken = default);
 
-    ValueTask<GitHubPagesResponse?> Create(string owner, string repo, GitHubPagesCreateRequest request, CancellationToken cancellationToken = default);
+    ValueTask<Page?> Create(string owner, string repo, PagesPostRequestBody request, CancellationToken cancellationToken = default);
 
-    ValueTask Update(string owner, string repo, GitHubPagesUpdateRequest request, CancellationToken cancellationToken = default);
+    ValueTask Update(string owner, string repo, PagesPutRequestBody request, CancellationToken cancellationToken = default);
 
     ValueTask Delete(string owner, string repo, CancellationToken cancellationToken = default);
 }

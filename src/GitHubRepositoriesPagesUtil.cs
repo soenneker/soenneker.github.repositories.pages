@@ -1,125 +1,100 @@
 ﻿using Microsoft.Extensions.Logging;
-using Soenneker.Extensions.HttpClient;
-using Soenneker.Extensions.HttpResponseMessage;
-using Soenneker.Extensions.Object;
+using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
-using Soenneker.GitHub.Client.Http.Abstract;
+using Soenneker.GitHub.ClientUtil.Abstract;
+using Soenneker.GitHub.OpenApiClient;
+using Soenneker.GitHub.OpenApiClient.Models;
+using Soenneker.GitHub.OpenApiClient.Repos.Item.Item.Pages;
 using Soenneker.GitHub.Repositories.Pages.Abstract;
-using Soenneker.GitHub.Repositories.Pages.Requests;
-using Soenneker.GitHub.Repositories.Pages.Responses;
-using System.Net.Http;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Soenneker.GitHub.Repositories.Pages;
 
 /// <inheritdoc cref="IGitHubRepositoriesPagesUtil"/>
-public class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
+public sealed class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
 {
     private readonly ILogger<GitHubRepositoriesPagesUtil> _logger;
-    private readonly IGitHubHttpClient _gitHubHttpClient;
+    private readonly IGitHubOpenApiClientUtil _gitHubClientUtil;
 
-    public GitHubRepositoriesPagesUtil(ILogger<GitHubRepositoriesPagesUtil> logger, IGitHubHttpClient gitHubHttpClient)
+    public GitHubRepositoriesPagesUtil(ILogger<GitHubRepositoriesPagesUtil> logger, IGitHubOpenApiClientUtil gitHubClientUtil)
     {
         _logger = logger;
-        _gitHubHttpClient = gitHubHttpClient;
+        _gitHubClientUtil = gitHubClientUtil;
     }
 
-    public async ValueTask<GitHubPagesResponse?> Get(string owner, string repo, CancellationToken cancellationToken = default)
+    public async ValueTask<Page?> Get(string owner, string repo, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Updating GitHub Pages to use GitHub Actions for repo ({owner}/{repo})...", owner, repo);
+        _logger.LogInformation("Getting GitHub Pages information for repo ({owner}/{repo})...", owner, repo);
 
-        HttpClient client = await _gitHubHttpClient.Get(cancellationToken).NoSync();
+        GitHubOpenApiClient client = await _gitHubClientUtil.Get(cancellationToken).NoSync();
+        PagesRequestBuilder? pagesClient = client.Repos[owner][repo].Pages;
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"repos/{owner}/{repo}/pages");
-
-        (GitHubPagesResponse? successResponse, string? errorResponse) = await client.TrySendWithError<GitHubPagesResponse, string>(requestMessage, _logger, cancellationToken).NoSync();
-
-        if (successResponse == null)
+        try
         {
-            if (errorResponse != null)
-            {
-                _logger.LogError("Failed to update GitHub pages setting: {ErrorContent}", errorResponse);
-            }
-            else
-                _logger.LogError("Failed to update GitHub pages setting");
-
+            Page? page = await pagesClient.GetAsync(cancellationToken: cancellationToken).NoSync();
+            return page;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get GitHub pages information");
             return null;
         }
-
-        return successResponse;
     }
 
-    public async ValueTask<GitHubPagesResponse?> Create(string owner, string repo, GitHubPagesCreateRequest request, CancellationToken cancellationToken = default)
+    public async ValueTask<Page?> Create(string owner, string repo, PagesPostRequestBody request, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Updating GitHub Pages to use GitHub Actions for repo ({owner}/{repo})...", owner, repo);
+        _logger.LogInformation("Creating GitHub Pages site for repo ({owner}/{repo})...", owner, repo);
 
-        HttpClient client = await _gitHubHttpClient.Get(cancellationToken).NoSync();
+        GitHubOpenApiClient client = await _gitHubClientUtil.Get(cancellationToken).NoSync();
+        PagesRequestBuilder? pagesClient = client.Repos[owner][repo].Pages;
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"repos/{owner}/{repo}/pages");
-
-        requestMessage.Content = request.ToHttpContent();
-
-        (GitHubPagesResponse? successResponse, string? errorResponse) = await client.TrySendWithError<GitHubPagesResponse, string>(requestMessage, _logger, cancellationToken).NoSync();
-
-        if (successResponse == null)
+        try
         {
-            if (errorResponse != null)
-            {
-                _logger.LogError("Failed to update GitHub pages setting: {ErrorContent}", errorResponse);
-            }
-            else
-                _logger.LogError("Failed to update GitHub pages setting");
-
+            Page? page = await pagesClient.PostAsync(request, cancellationToken: cancellationToken).NoSync();
+            return page;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create GitHub pages site");
             return null;
         }
-
-        return successResponse;
     }
 
-    public async ValueTask Update(string owner, string repo, GitHubPagesUpdateRequest request, CancellationToken cancellationToken = default)
+    public async ValueTask Update(string owner, string repo, PagesPutRequestBody request, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Updating GitHub Pages to use GitHub Actions for repo ({owner}/{repo})...", owner, repo);
+        _logger.LogInformation("Updating GitHub Pages site for repo ({owner}/{repo})...", owner, repo);
 
-        HttpClient client = await _gitHubHttpClient.Get(cancellationToken).NoSync();
+        GitHubOpenApiClient client = await _gitHubClientUtil.Get(cancellationToken).NoSync();
+        PagesRequestBuilder? pagesClient = client.Repos[owner][repo].Pages;
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"repos/{owner}/{repo}/pages");
-
-        requestMessage.Content = request.ToHttpContent();
-
-        (bool successful, HttpResponseMessage? response) = await client.TrySend(requestMessage, _logger, cancellationToken).NoSync();
-
-        if (!successful)
+        try
         {
-            if (response != null)
-            {
-                string? errorContent = await response.ToStringSafe(_logger, cancellationToken).NoSync();
-                _logger.LogError("Failed to update GitHub pages setting: {StatusCode} - {ErrorContent}", response.StatusCode, errorContent);
-            }
-            else
-                _logger.LogError("Failed to update GitHub pages setting");
+            await pagesClient.PutAsync(request, cancellationToken: cancellationToken).NoSync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update GitHub pages site");
+            throw;
         }
     }
 
     public async ValueTask Delete(string owner, string repo, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Updating GitHub Pages to use GitHub Actions for repo ({owner}/{repo})...", owner, repo);
+        _logger.LogInformation("Deleting GitHub Pages site for repo ({owner}/{repo})...", owner, repo);
 
-        HttpClient client = await _gitHubHttpClient.Get(cancellationToken).NoSync();
+        GitHubOpenApiClient client = await _gitHubClientUtil.Get(cancellationToken).NoSync();
+        PagesRequestBuilder? pagesClient = client.Repos[owner][repo].Pages;
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"repos/{owner}/{repo}/pages");
-
-        (bool successful, HttpResponseMessage? response) = await client.TrySend(requestMessage, _logger, cancellationToken).NoSync();
-
-        if (!successful)
+        try
         {
-            if (response != null)
-            {
-                string? errorContent = await response.ToStringSafe(_logger, cancellationToken).NoSync();
-                _logger.LogError("Failed to update GitHub pages setting: {StatusCode} - {ErrorContent}", response.StatusCode, errorContent);
-            }
-            else
-                _logger.LogError("Failed to update GitHub pages setting");
+            await pagesClient.DeleteAsync(cancellationToken: cancellationToken).NoSync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete GitHub pages site");
+            throw;
         }
     }
 }
