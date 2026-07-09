@@ -43,7 +43,7 @@ public sealed class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
         }
     }
 
-    public async ValueTask<Page?> Create(string owner, string repo, ReposCreatePagesSite request, CancellationToken cancellationToken = default)
+    public async ValueTask<Page?> Create(string owner, string repo, ReposCreatePagesSiteRequest request, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Creating GitHub Pages site for repo ({owner}/{repo})...", owner, repo);
 
@@ -62,7 +62,7 @@ public sealed class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
         }
     }
 
-    public async ValueTask Update(string owner, string repo, ReposUpdateInformationAboutPagesSite request, CancellationToken cancellationToken = default)
+    public async ValueTask Update(string owner, string repo, ReposUpdateInformationAboutPagesSiteRequest request, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Updating GitHub Pages site for repo ({owner}/{repo})...", owner, repo);
 

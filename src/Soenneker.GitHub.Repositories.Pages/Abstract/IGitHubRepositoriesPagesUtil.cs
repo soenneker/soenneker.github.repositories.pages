@@ -25,7 +25,7 @@ public interface IGitHubRepositoriesPagesUtil
     /// <param name="request">The request.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task containing the result of the operation.</returns>
-    ValueTask<Page?> Create(string owner, string repo, ReposCreatePagesSite request, CancellationToken cancellationToken = default);
+    ValueTask<Page?> Create(string owner, string repo, ReposCreatePagesSiteRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the update operation.
@@ -35,7 +35,7 @@ public interface IGitHubRepositoriesPagesUtil
     /// <param name="request">The request.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    ValueTask Update(string owner, string repo, ReposUpdateInformationAboutPagesSite request, CancellationToken cancellationToken = default);
+    ValueTask Update(string owner, string repo, ReposUpdateInformationAboutPagesSiteRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes the delete operation.
