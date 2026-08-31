@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace Soenneker.GitHub.Repositories.Pages;
 
-/// <inheritdoc cref="IGitHubRepositoriesPagesUtil"/>
 public sealed class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
 {
     private readonly ILogger<GitHubRepositoriesPagesUtil> _logger;
@@ -36,9 +35,9 @@ public sealed class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
             Page? page = await pagesClient.GetAsync(cancellationToken: cancellationToken).NoSync();
             return page;
         }
-        catch (Exception ex)
+        catch (BasicError ex) when (ex.ResponseStatusCode == 404)
         {
-            _logger.LogError(ex, "Failed to get GitHub pages information");
+            _logger.LogDebug("GitHub Pages is not configured for {owner}/{repo}", owner, repo);
             return null;
         }
     }
@@ -50,16 +49,7 @@ public sealed class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
         GitHubOpenApiClient client = await _gitHubClientUtil.Get(cancellationToken).NoSync();
         PagesRequestBuilder? pagesClient = client.Repos[owner][repo].Pages;
 
-        try
-        {
-            Page? page = await pagesClient.PostAsync(request, cancellationToken: cancellationToken).NoSync();
-            return page;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to create GitHub pages site");
-            return null;
-        }
+        return await pagesClient.PostAsync(request, cancellationToken: cancellationToken).NoSync();
     }
 
     public async ValueTask Update(string owner, string repo, ReposUpdateInformationAboutPagesSiteRequest request, CancellationToken cancellationToken = default)
