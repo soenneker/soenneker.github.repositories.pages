@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Soenneker.GitHub.Repositories.Pages;
 
+/// <inheritdoc cref="IGitHubRepositoriesPagesUtil" />
 public sealed class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
 {
     private readonly ILogger<GitHubRepositoriesPagesUtil> _logger;
