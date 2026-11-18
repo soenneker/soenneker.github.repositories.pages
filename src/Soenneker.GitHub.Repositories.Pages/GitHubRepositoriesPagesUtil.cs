@@ -38,7 +38,8 @@ public sealed class GitHubRepositoriesPagesUtil : IGitHubRepositoriesPagesUtil
         }
         catch (BasicError ex) when (ex.ResponseStatusCode == 404)
         {
-            _logger.LogDebug("GitHub Pages is not configured for {owner}/{repo}", owner, repo);
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("GitHub Pages is not configured for {owner}/{repo}", owner, repo);
             return null;
         }
     }
